@@ -4,6 +4,8 @@ import { ThemeProvider, useTheme } from './ThemeContext'; // Import ThemeProvide
 import CountryList from './CountryList';
 import CountryDetail from './CountryDetails';
 import Dropdown from './Dropdown';
+import { FaSun, FaMoon } from "react-icons/fa";
+
 
 function App() {
   return (
@@ -56,22 +58,24 @@ const Main = () => {
       {/* Header */}
       <header className="flex justify-between items-center p-6 shadow-md">
         <h1 className="text-2xl md:text-4xl font-bold">Where in the World?</h1>
-        <button
-          onClick={toggleTheme}
-          className="flex items-center space-x-2 p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
-        >
-          {darkMode ? (
-            <>
-              {/* <FaSun /> */}
-              <span>Light Mode</span>
-            </>
-          ) : (
-            <>
-              {/* <FaMoon /> */}
-              <span>Dark Mode</span>
-            </>
-          )}
-        </button>
+
+<button
+  onClick={toggleTheme}
+  className="flex items-center space-x-2 p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
+>
+  {darkMode ? (
+    <>
+      <FaSun className="text-yellow-500" /> {/* Sun Icon */}
+      <span>Light Mode</span>
+    </>
+  ) : (
+    <>
+      <FaMoon className="text-blue-500" /> {/* Moon Icon */}
+      <span>Dark Mode</span>
+    </>
+  )}
+</button>
+
       </header>
 
       {/* Filters and Search */}
