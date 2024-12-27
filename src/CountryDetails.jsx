@@ -74,11 +74,11 @@ const CountryDetail = () => {
     <div className={`p-10 rounded-lg shadow-md flex flex-col md:flex-row gap-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} transition-colors duration-300`}> 
       {/* Left Side: Back Button and Image */}
       <div className="flex flex-col items-center md:items-start">
-        <Link
-          to="/"
-          className="mb-4 px-8 py-2 rounded-md bg-blue-200 text-black hover:bg-blue-600 transition-colors duration-300 self-start"
-        >
-          Back
+      <Link
+  to="/"
+  className="mb-4 px-12 py-4 rounded-md bg-white text-black border border-black hover:bg-gray-100 text-lg"
+>
+          Go Back
         </Link>
         <img
           src={country.flags.svg || country.flags.png}
