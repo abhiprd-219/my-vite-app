@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTheme } from './ThemeContext'; // Import useTheme from ThemeContext
 
 const CountryDetail = () => {
   const { countryName } = useParams();
@@ -8,6 +9,7 @@ const CountryDetail = () => {
   const [error, setError] = useState(null);
   const [borderCountries, setBorderCountries] = useState([]);
   const navigate = useNavigate();
+  const { darkMode } = useTheme(); // Get darkMode from ThemeContext
 
   useEffect(() => {
     const fetchCountry = async () => {
@@ -69,7 +71,7 @@ const CountryDetail = () => {
   }
 
   return (
-    <div className="p-10 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col md:flex-row gap-6">
+    <div className={`p-10 rounded-lg shadow-md flex flex-col md:flex-row gap-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} transition-colors duration-300`}> 
       {/* Left Side: Back Button and Image */}
       <div className="flex flex-col items-center md:items-start">
         <Link

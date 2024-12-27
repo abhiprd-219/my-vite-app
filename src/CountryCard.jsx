@@ -1,22 +1,29 @@
+// src/CountryCard.jsx
 import React from "react";
+import { Link } from "react-router-dom";
 
-const CountryCard = ({ country, darkMode }) => {
+const CountryCard = ({ country }) => {
   return (
-    <div
-      className={`p-4 rounded-md shadow-lg shadow-black/50 ${
-        darkMode ? "bg-green-500 text-white" : "bg-white text-black"
-      }`}
+    <Link
+      to={`/country/${country.name.common}`}
+      className="p-4 rounded-lg shadow-md text-left hover:shadow-lg transition-shadow duration-300"
     >
       <img
-        src={country.flags.svg}
+        src={country.flags.svg || country.flags.png}
         alt={`${country.name.common} flag`}
         className="w-full h-32 object-cover rounded-md mb-4"
       />
-      <h2 className="text-lg font-bold mb-2">{country.name.common}</h2>
-      <p className="text-sm mb-1">Region: {country.region}</p>
-      <p className="text-sm mb-1">Capital: {country.capital?.[0]}</p>
-      <p className="text-sm">Population: {country.population.toLocaleString()}</p>
-    </div>
+      <h2 className="text-lg font-semibold mb-2">{country.name.common}</h2>
+      <p className="text-sm">
+        <strong>Region:</strong> {country.region}
+      </p>
+      <p className="text-sm">
+        <strong>Population:</strong> {country.population.toLocaleString()}
+      </p>
+      <p className="text-sm">
+        <strong>Area:</strong> {country.area.toLocaleString()} km²
+      </p>
+    </Link>
   );
 };
 
