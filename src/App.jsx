@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider, useTheme } from './ThemeContext'; // Import ThemeProvider and useTheme
-import CountryList from './CountryList';
-import CountryDetail from './CountryDetails';
-import Dropdown from './Dropdown';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { ThemeProvider, useTheme } from "./ThemeContext";
+import CountryList from "./CountryList";
+import CountryDetail from "./CountryDetails";
+import Dropdown from "./Dropdown";
 import { FaSun, FaMoon } from "react-icons/fa";
-
 
 function App() {
   return (
@@ -19,11 +18,12 @@ function App() {
 
 const Main = () => {
   const { darkMode, toggleTheme } = useTheme();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [regionFilter, setRegionFilter] = useState('');
-  const [languageFilter, setLanguageFilter] = useState('');
-  const [subregionFilter, setSubregionFilter] = useState('');
-  const [sortOrder, setSortOrder] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
+  const [subregionFilter, setSubregionFilter] = useState("");
+  const [languageFilter, setLanguageFilter] = useState("");
+  const [languages, setLanguages] = useState([]); // Array to store all unique languages
+  const [subregions, setSubregions] = useState([]); // Array to store dynamic subregions
   const [countriesData, setCountriesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,12 +33,18 @@ const Main = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('https://restcountries.com/v3.1/all');
+        const response = await fetch("https://restcountries.com/v3.1/all");
         if (!response.ok) {
-          throw new Error('Failed to fetch countries. Please try again later.');
+          throw new Error("Failed to fetch countries. Please try again later.");
         }
         const data = await response.json();
         setCountriesData(data);
+
+        // Extract and store all unique languages
+        const allLanguages = data.flatMap((country) =>
+          country.languages ? Object.values(country.languages) : []
+        );
+        setLanguages([...new Set(allLanguages)]); // Deduplicate languages
       } catch (err) {
         setError(err.message);
       } finally {
@@ -49,33 +55,43 @@ const Main = () => {
     fetchCountries();
   }, []);
 
+  // Update subregions when region changes
+  useEffect(() => {
+    if (regionFilter) {
+      const filteredSubregions = countriesData
+        .filter((country) => country.region === regionFilter)
+        .map((country) => country.subregion)
+        .filter(Boolean); // Remove null/undefined values
+      setSubregions([...new Set(filteredSubregions)]); // Deduplicate subregions
+    } else {
+      setSubregions([]); // Clear subregions if no region is selected
+    }
+    setSubregionFilter(""); // Reset subregion filter when region changes
+  }, [regionFilter, countriesData]);
+
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
-        darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'
+        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
       }`}
     >
       {/* Header */}
       <header className="flex justify-between items-center p-6 shadow-md">
         <h1 className="text-2xl md:text-4xl font-bold">Where in the World?</h1>
-
-<button
-  onClick={toggleTheme}
-  className="flex items-center space-x-2 p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
->
-  {darkMode ? (
-    <>
-      <FaSun className="text-yellow-500" /> {/* Sun Icon */}
-      <span>Light Mode</span>
-    </>
-  ) : (
-    <>
-      <FaMoon className="text-blue-500" /> {/* Moon Icon */}
-      <span>Dark Mode</span>
-    </>
-  )}
-</button>
-
+        <button
+          onClick={toggleTheme}
+          className="flex items-center space-x-2 p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
+        >
+          {darkMode ? (
+            <>
+              <FaSun className="text-yellow-500" /> <span>Light Mode</span>
+            </>
+          ) : (
+            <>
+              <FaMoon className="text-blue-500" /> <span>Dark Mode</span>
+            </>
+          )}
+        </button>
       </header>
 
       {/* Filters and Search */}
@@ -92,40 +108,26 @@ const Main = () => {
 
         <Dropdown
           label="Region"
-          options={['Africa', 'Americas', 'Asia', 'Europe', 'Oceania']}
+          options={["Africa", "Americas", "Asia", "Europe", "Oceania"]}
           value={regionFilter}
           onChange={setRegionFilter}
           darkMode={darkMode}
         />
 
         <Dropdown
-          label="Language"
-          options={getLanguageOptions(countriesData)}
-          value={languageFilter}
-          onChange={setLanguageFilter}
-          darkMode={darkMode}
-        />
-
-        <Dropdown
           label="Subregion"
-          options={getSubregionOptions(regionFilter)}
+          options={subregions}
           value={subregionFilter}
           onChange={setSubregionFilter}
           darkMode={darkMode}
-          disabled={!regionFilter}
-          placeholder="Select any region first"
+          disabled={!regionFilter} // Disable if no region is selected
         />
 
         <Dropdown
-          label="Sort By"
-          options={[
-            'Area (Asc)',
-            'Area (Desc)',
-            'Population (Asc)',
-            'Population (Desc)',
-          ]}
-          value={sortOrder}
-          onChange={setSortOrder}
+          label="Language"
+          options={languages}
+          value={languageFilter}
+          onChange={setLanguageFilter}
           darkMode={darkMode}
         />
       </div>
@@ -139,9 +141,8 @@ const Main = () => {
               <CountryList
                 searchTerm={searchTerm}
                 regionFilter={regionFilter}
-                languageFilter={languageFilter}
                 subregionFilter={subregionFilter}
-                sortOrder={sortOrder}
+                languageFilter={languageFilter}
                 countriesData={countriesData}
               />
             }
@@ -154,32 +155,6 @@ const Main = () => {
       </main>
     </div>
   );
-};
-
-const getSubregionOptions = (regionFilter) => {
-  const subregionOptions = {
-    Africa: ['Northern Africa', 'Southern Africa', 'Central Africa', 'Western Africa', 'Eastern Africa'],
-    Americas: ['North America', 'South America', 'Central America', 'Caribbean'],
-    Asia: ['Eastern Asia', 'South-Eastern Asia', 'Southern Asia', 'Central Asia', 'Western Asia'],
-    Europe: ['Eastern Europe', 'Northern Europe', 'Western Europe', 'Southern Europe'],
-    Oceania: ['Australia and New Zealand', 'Melanesia', 'Micronesia', 'Polynesia'],
-  };
-  return subregionOptions[regionFilter] || [];
-};
-
-const getLanguageOptions = (countriesData) => {
-  const allLanguages = countriesData.flatMap((country) => {
-    if (Array.isArray(country.languages)) {
-      return country.languages.map((lang) => lang.iso639_1); // Extract iso639_1 code
-    } else if (typeof country.languages === 'object') {
-      return Object.keys(country.languages); // Extract language codes from object
-    } else {
-      return [country.languages]; // Handle cases where languages is a single string
-    }
-  });
-
-  const uniqueLanguages = [...new Set(allLanguages)];
-  return uniqueLanguages;
 };
 
 export default App;
